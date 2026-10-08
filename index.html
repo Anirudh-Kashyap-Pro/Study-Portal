@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura Daily Tracker & Analytics Portal</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js CDN for graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#faf9f8',
+                            100: '#f4f2f0',
+                            500: '#1c1917',
+                            600: '#0c0a09',
+                            900: '#000000',
+                            accent: '#c5a059' /* Expensive luxury gold/champagne tone */
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .luxury-glass {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(228, 222, 215, 0.6);
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        .animate-float {
+            animation: float 7s ease-in-out infinite;
+        }
+        .blob {
+            filter: blur(90px);
+            opacity: 0.25;
+            z-index: -1;
+            transition: all 0.8s ease;
+        }
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+</head>
+<body class="bg-[#fcfbfa] text-stone-900 font-sans antialiased selection:bg-stone-900 selection:text-white relative overflow-x-hidden min-h-screen flex flex-col justify-between">
+
+    <div class="absolute top-0 left-1/4 w-96 h-96 bg-stone-200 rounded-full blob animate-float"></div>
+    <div class="absolute top-1/3 right-1/4 w-[32rem] h-[32rem] bg-amber-100 rounded-full blob animate-float" style="animation-delay: 2s;"></div>
+    <div class="absolute bottom-1/4 left-1/3 w-[28rem] h-[28rem] bg-orange-50 rounded-full blob animate-float" style="animation-delay: 4s;"></div>
+
+    <header class="sticky top-0 left-0 right-0 z-50 px-4 sm:px-8 py-4">
+        <nav class="max-w-7xl mx-auto luxury-glass rounded-2xl px-4 sm:px-6 py-3.5 flex items-center justify-between shadow-xs overflow-x-auto no-scrollbar">
+            <a href="#" class="text-base sm:text-xl font-extrabold tracking-tight text-stone-900 flex items-center gap-2.5 shrink-0 mr-4">
+                <span class="w-8 h-8 rounded-xl bg-stone-900 text-white flex items-center justify-center text-sm shadow-sm font-semibold">A</span> 
+                AURA <span class="text-stone-400 font-light tracking-widest text-[10px] sm:text-xs uppercase">Daily Tracker</span>
+            </a>
+            <div class="flex items-center space-x-1 sm:space-x-2 shrink-0">
+                <button onclick="switchTab('tracker')" id="nav-tracker" class="px-3.5 sm:px-4 py-2 text-[11px] sm:text-xs font-bold tracking-wider uppercase text-white bg-stone-900 rounded-xl transition-all shadow-sm whitespace-nowrap">
+                    <i class="fa-solid fa-pen-nib mr-1.5"></i> Daily Entry
+                </button>
+                <button onclick="switchTab('charts')" id="nav-charts" class="px-3.5 sm:px-4 py-2 text-[11px] sm:text-xs font-bold tracking-wider uppercase text-stone-600 luxury-glass hover:bg-white/90 rounded-xl transition-all shadow-xs whitespace-nowrap">
+                    <i class="fa-solid fa-chart-pie mr-1.5 text-stone-900"></i> Analytics
+                </button>
+                <button onclick="switchTab('games')" id="nav-games" class="px-3.5 sm:px-4 py-2 text-[11px] sm:text-xs font-bold tracking-wider uppercase text-stone-600 luxury-glass hover:bg-white/90 rounded-xl transition-all shadow-xs whitespace-nowrap">
+                    <i class="fa-solid fa-gamepad mr-1.5 text-stone-900"></i> Focus Break
+                </button>
+                <button onclick="switchTab('admin')" id="nav-admin" class="px-3.5 sm:px-4 py-2 text-[11px] sm:text-xs font-bold tracking-wider uppercase text-stone-600 luxury-glass hover:bg-white/90 rounded-xl transition-all shadow-xs whitespace-nowrap">
+                    <i class="fa-solid fa-shield-halved mr-1.5 text-stone-900"></i> Admin
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-8 py-8">
+
+        <!-- STUDENT DAILY ENTRY TAB -->
+        <section id="tab-tracker" class="space-y-8">
+            <div class="text-center max-w-2xl mx-auto">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full luxury-glass text-[11px] font-bold text-stone-700 uppercase tracking-widest mb-4 shadow-xs">
+                    <span class="w-1.5 h-1.5 rounded-full bg-stone-900 animate-pulse"></span>
+                    Minimalist Progress Logger
+                </div>
+                <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-stone-900 mb-3">
+                    Daily Study Log
+                </h1>
+                <p class="text-stone-500 text-xs sm:text-sm font-light leading-relaxed">
+                    Record your focused hours, explicit study topics, and learning source with pristine precision.
+                </p>
+            </div>
+
+            <div class="max-w-xl mx-auto luxury-glass rounded-3xl p-6 sm:p-10 shadow-xl relative overflow-hidden">
+                <form id="study-form" onsubmit="handleStudySubmit(event)" class="space-y-5">
+                    <div>
+                        <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-2">Select Student</label>
+                        <select id="student-name" required class="w-full px-4 py-3 rounded-xl bg-white/90 border border-stone-200 focus:border-stone-900 focus:outline-none text-xs transition-all font-semibold text-stone-800 shadow-2xs">
+                            <option value="" disabled selected>-- Choose your name --</option>
+                            <option value="Anirudh">Anirudh</option>
+                            <option value="Aditya">Aditya</option>
+                            <option value="Shreyash">Shreyash</option>
+                            <option value="Nishant">Nishant</option>
+                            <option value="Ayush">Ayush</option>
+                            <option value="Suraj">Suraj</option>
+                            <option value="Junaid">Junaid</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-2">Date</label>
+                            <input type="date" id="study-date" required class="w-full px-4 py-3 rounded-xl bg-white/90 border border-stone-200 focus:border-stone-900 focus:outline-none text-xs transition-all font-medium text-stone-800 shadow-2xs">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-2">Hours Studied</label>
+                            <input type="number" step="0.5" min="0.5" max="16" id="study-hours" required placeholder="e.g. 4.5" class="w-full px-4 py-3 rounded-xl bg-white/90 border border-stone-200 focus:border-stone-900 focus:outline-none text-xs transition-all font-medium text-stone-800 shadow-2xs">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-2">What Studied Today</label>
+                        <input type="text" id="study-topic" required placeholder="e.g. Advanced Graph Theory, React Hooks..." class="w-full px-4 py-3 rounded-xl bg-white/90 border border-stone-200 focus:border-stone-900 focus:outline-none text-xs transition-all font-medium text-stone-800 shadow-2xs">
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-2">Source / Material Used</label>
+                        <input type="text" id="study-source" required placeholder="e.g. Documentation, Textbook Ch. 4, YouTube Lectures..." class="w-full px-4 py-3 rounded-xl bg-white/90 border border-stone-200 focus:border-stone-900 focus:outline-none text-xs transition-all font-medium text-stone-800 shadow-2xs">
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-2">Key Takeaways & Reflections</label>
+                        <textarea id="study-notes" rows="3" required placeholder="Brief summary of your progress and insights..." class="w-full px-4 py-3 rounded-xl bg-white/90 border border-stone-200 focus:border-stone-900 focus:outline-none text-xs transition-all font-medium text-stone-800 shadow-2xs resize-none"></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full py-3.5 text-xs font-bold tracking-wider uppercase text-white bg-stone-900 rounded-xl hover:bg-stone-800 transition-all shadow-md">
+                        Commit Daily Entry
+                    </button>
+                </form>
+
+                <!-- Success Toast -->
+                <div id="entry-success" class="hidden mt-4 p-4 rounded-xl bg-stone-900 text-stone-100 text-center text-xs font-semibold shadow-md">
+                    <i class="fa-solid fa-circle-check mr-2 text-amber-400"></i> Entry successfully logged.
+                </div>
+            </div>
+        </section>
+
+        <!-- CHARTS & ANALYTICS TAB -->
+        <section id="tab-charts" class="hidden space-y-8">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900">Analytics & Metrics</h1>
+                    <p class="text-stone-500 text-xs sm:text-sm mt-1">High-end data visualization tracking output and consistency.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <select id="chart-filter-student" onchange="updateCharts()" class="px-4 py-2 rounded-xl bg-white border border-stone-200 text-xs font-semibold text-stone-800 focus:outline-none shadow-2xs">
+                        <option value="all">All Students Overview</option>
+                        <option value="Anirudh">Anirudh</option>
+                        <option value="Aditya">Aditya</option>
+                        <option value="Shreyash">Shreyash</option>
+                        <option value="Nishant">Nishant</option>
+                        <option value="Ayush">Ayush</option>
+                        <option value="Suraj">Suraj</option>
+                        <option value="Junaid">Junaid</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Top Row: Leaderboard & Pie Chart -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Leaderboard Card -->
+                <div class="luxury-glass rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-sm font-bold uppercase tracking-wider text-stone-900 flex items-center gap-2">
+                                <i class="fa-solid fa-crown text-amber-600"></i> Leaderboard
+                            </h3>
+                            <span class="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 bg-stone-100 text-stone-700 rounded-full">Rankings</span>
+                        </div>
+                        <div id="leaderboard-list" class="space-y-3">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-stone-200/60 text-center text-[11px] text-stone-400 font-medium">
+                        Ranked by cumulative hours & active days.
+                    </div>
+                </div>
+
+                <!-- Pie Chart Card -->
+                <div class="luxury-glass rounded-3xl p-6 sm:p-8 shadow-xl lg:col-span-2 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-sm font-bold uppercase tracking-wider text-stone-900 flex items-center gap-2">
+                                <i class="fa-solid fa-chart-pie text-stone-700"></i> Hours Distribution Share
+                            </h3>
+                            <span class="text-[11px] text-stone-400 font-medium">Proportional Share per Student</span>
+                        </div>
+                        <div class="relative h-64 flex items-center justify-center">
+                            <canvas id="hoursPieChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Second Row: Bar Graph & Aesthetic Cool Graph (Days/Hours Studied vs Not Studied) -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Bar Graph Card -->
+                <div class="luxury-glass rounded-3xl p-6 sm:p-8 shadow-xl">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-bold uppercase tracking-wider text-stone-900 flex items-center gap-2">
+                            <i class="fa-solid fa-chart-column text-stone-700"></i> Total Study Hours
+                        </h3>
+                        <span class="text-[11px] text-stone-400 font-medium">Aggregated Hours</span>
+                    </div>
+                    <div class="relative h-64">
+                        <canvas id="hoursBarChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Aesthetic Cool Graph: Days Studied vs Not Studied & Hours Studied vs Not Studied -->
+                <div class="luxury-glass rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-sm font-bold uppercase tracking-wider text-stone-900 flex items-center gap-2">
+                                <i class="fa-solid fa-wave-square text-stone-700"></i> Studied vs. Rest Days (7-Day Trend)
+                            </h3>
+                            <span class="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 bg-stone-900 text-stone-100 rounded-full">Consistency Curve</span>
+                        </div>
+                        <p class="text-[11px] text-stone-400 mb-4 font-medium">Analyzing active study intervals against unlogged rest days over the past week.</p>
+                        <div class="relative h-56">
+                            <canvas id="aestheticWaveChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-stone-200/60 flex items-center justify-around text-center text-[11px] text-stone-600 font-semibold">
+                        <div>
+                            <span class="w-2.5 h-2.5 rounded-full bg-stone-900 inline-block mr-1.5"></span> Active Study Days
+                        </div>
+                        <div>
+                            <span class="w-2.5 h-2.5 rounded-full bg-stone-300 inline-block mr-1.5"></span> Inactive / Rest Days
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOCUS BREAK / GAMES TAB -->
+        <section id="tab-games" class="hidden space-y-8">
+            <div class="text-center max-w-2xl mx-auto">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full luxury-glass text-[11px] font-bold text-stone-700 uppercase tracking-widest mb-4 shadow-xs">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                    Zen Break Station
+                </div>
+                <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-stone-900 mb-3">
+                    Zen Orbit Reflex
+                </h1>
+                <p class="text-stone-500 text-xs sm:text-sm font-light leading-relaxed">
+                    Take a refreshing mental reset between study sprints. Tap or click when the moving core aligns with the target ring to score points!
+                </p>
+            </div>
+
+            <div class="max-w-lg mx-auto luxury-glass rounded-3xl p-6 sm:p-8 shadow-xl text-center relative overflow-hidden">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="text-left">
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-stone-400">Score</span>
+                        <h3 id="game-score" class="text-2xl font-extrabold text-stone-900">0</h3>
+                    </div>
+                    <div class="text-center">
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-stone-400">High Score</span>
+                        <h3 id="game-highscore" class="text-2xl font-extrabold text-amber-600">0</h3>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-stone-400">Status</span>
+                        <h3 id="game-status" class="text-xs font-bold text-stone-700 mt-1">Ready</h3>
+                    </div>
+                </div>
+
+                <!-- Game Canvas Container -->
+                <div class="relative w-full aspect-square bg-stone-900 rounded-2xl overflow-hidden shadow-inner flex items-center justify-center cursor-pointer mb-6 group" onclick="handleGameAction()">
+                    <canvas id="zenCanvas" class="w-full h-full"></canvas>
+                    <div id="game-overlay-msg" class="absolute inset-0 bg-stone-950/80 backdrop-blur-xs flex flex-col items-center justify-center text-white p-6 transition-opacity">
+                        <div class="w-16 h-16 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 text-2xl mb-4 animate-bounce">
+                            <i class="fa-solid fa-meteor"></i>
+                        </div>
+                        <h3 class="text-lg font-bold mb-1">Zen Orbit</h3>
+                        <p class="text-xs text-stone-400 mb-6 text-center">Tap screen or press Spacebar when the glowing particle aligns with the golden ring.</p>
+                        <button onclick="startGame(event)" class="px-6 py-3 bg-white text-stone-900 text-xs font-bold tracking-wider uppercase rounded-xl hover:bg-stone-200 transition-all shadow-lg">
+                            Start Game
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-center gap-3">
+                    <button onclick="startGame()" class="px-5 py-2.5 bg-stone-900 text-white text-xs font-bold tracking-wider uppercase rounded-xl hover:bg-stone-800 transition-all shadow-md">
+                        <i class="fa-solid fa-rotate-right mr-1.5"></i> Restart
+                    </button>
+                    <button onclick="switchTab('tracker')" class="px-5 py-2.5 luxury-glass text-stone-700 text-xs font-bold tracking-wider uppercase rounded-xl hover:bg-white transition-all shadow-xs">
+                        Back to Studies <i class="fa-solid fa-arrow-right ml-1.5"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ADMIN PORTAL TAB -->
+        <section id="tab-admin" class="hidden space-y-8">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900">Admin Control</h1>
+                    <p class="text-stone-500 text-xs sm:text-sm mt-1">Review live student submissions and manage records.</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="exportData()" class="px-4 py-2 text-xs font-bold tracking-wider uppercase text-stone-700 luxury-glass hover:bg-white/90 rounded-xl transition-all shadow-2xs">
+                        <i class="fa-solid fa-download mr-1.5"></i> Export JSON
+                    </button>
+                    <button onclick="clearAllData()" class="px-4 py-2 text-xs font-bold tracking-wider uppercase text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-xl transition-all border border-rose-100">
+                        <i class="fa-solid fa-trash mr-1.5"></i> Clear Records
+                    </button>
+                </div>
+            </div>
+
+            <!-- Student Summary Cards Grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4" id="student-summary-cards">
+                <!-- Dynamically populated -->
+            </div>
+
+            <!-- Entries Table -->
+            <div class="luxury-glass rounded-3xl p-6 sm:p-8 shadow-xl overflow-hidden">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-sm font-bold uppercase tracking-wider text-stone-900">All Submissions Archive</h3>
+                    <span id="total-entries-count" class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 bg-stone-900 text-stone-100 rounded-full">0 Entries</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-stone-200/80 text-[10px] font-bold text-stone-400 uppercase tracking-widest">
+                                <th class="pb-3 px-3">Student</th>
+                                <th class="pb-3 px-3">Date</th>
+                                <th class="pb-3 px-3">Hours</th>
+                                <th class="pb-3 px-3">What Studied</th>
+                                <th class="pb-3 px-3">Source / Material</th>
+                                <th class="pb-3 px-3">Notes</th>
+                                <th class="pb-3 px-3 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="entries-table-body" class="text-xs divide-y divide-stone-100">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Empty state -->
+                <div id="empty-state" class="text-center py-12 text-stone-400">
+                    <i class="fa-solid fa-box-open text-3xl mb-3 font-light"></i>
+                    <p class="text-xs font-medium">No study logs recorded yet. Begin logging via Daily Entry.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="py-8 px-4 border-t border-stone-200/60 mt-12">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-stone-400 font-medium">
+            <p>&copy; 2026 Aura Daily Tracker &bull; Anirudh, Aditya, Shreyash, Nishant, Ayush, Suraj, Junaid</p>
+            <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full luxury-glass text-stone-600">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span>
+                <span>Crafted by <strong class="text-stone-900 font-semibold tracking-wide">Anirudh</strong></span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const studentsList = ["Anirudh", "Aditya", "Shreyash", "Nishant", "Ayush", "Suraj", "Junaid"];
+
+        // Set default date to today
+        document.getElementById('study-date').valueAsDate = new Date();
+
+        // Fresh initialization: No pre-existing demo entries
+        let studyEntries = JSON.parse(localStorage.getItem('aura_study_entries')) || [];
+
+        let pieChartInstance = null;
+        let barChartInstance = null;
+        let waveChartInstance = null;
+
+        function switchTab(tab) {
+            const trackerTab = document.getElementById('tab-tracker');
+            const chartsTab = document.getElementById('tab-charts');
+            const gamesTab = document.getElementById('tab-games');
+            const adminTab = document.getElementById('tab-admin');
+            const navTracker = document.getElementById('nav-tracker');
+            const navCharts = document.getElementById('nav-charts');
+            const navGames = document.getElementById('nav-games');
+            const navAdmin = document.getElementById('nav-admin');
+
+            trackerTab.classList.add('hidden');
+            chartsTab.classList.add('hidden');
+            gamesTab.classList.add('hidden');
+            adminTab.classList.add('hidden');
+            
+            navTracker.className = "px-4 py-2 text-xs font-bold tracking-wider uppercase text-stone-600 luxury-glass hover:bg-white/90 rounded-xl transition-all shadow-xs whitespace-nowrap";
+            navCharts.className = "px-4 py-2 text-xs font-bold tracking-wider uppercase text-stone-600 luxury-glass hover:bg-white/90 rounded-xl transition-all shadow-xs whitespace-nowrap";
+            navGames.className = "px-4 py-2 text-xs font-bold tracking-wider uppercase text-stone-600 luxury-glass hover:bg-white/90 rounded-xl transition-all shadow-xs whitespace-nowrap";
+            navAdmin.className = "px-4 py-2 text-xs font-bold tracking-wider uppercase text-stone-600 luxury-glass hover:bg-white/90 rounded-xl transition-all shadow-xs whitespace-nowrap";
+
+            if (tab === 'tracker') {
+                trackerTab.classList.remove('hidden');
+                navTracker.className = "px-4 py-2 text-xs font-bold tracking-wider uppercase text-white bg-stone-900 rounded-xl transition-all shadow-sm whitespace-nowrap";
+                stopGameLoop();
+            } else if (tab === 'charts') {
+                chartsTab.classList.remove('hidden');
+                navCharts.className = "px-4 py-2 text-xs font-bold tracking-wider uppercase text-white bg-stone-900 rounded-xl transition-all shadow-sm whitespace-nowrap";
+                renderChartsAndLeaderboard();
+                stopGameLoop();
+            } else if (tab === 'games') {
+                gamesTab.classList.remove('hidden');
+                navGames.className = "px-4 py-2 text-xs font-bold tracking-wider uppercase text-white bg-stone-900 rounded-xl transition-all shadow-sm whitespace-nowrap";
+                initGameCanvas();
+            } else if (tab === 'admin') {
+                adminTab.classList.remove('hidden');
+                navAdmin.className = "px-4 py-2 text-xs font-bold tracking-wider uppercase text-white bg-stone-900 rounded-xl transition-all shadow-sm whitespace-nowrap";
+                renderAdminData();
+                stopGameLoop();
+            }
+        }
+
+        function handleStudySubmit(e) {
+            e.preventDefault();
+            const student = document.getElementById('student-name').value;
+            const date = document.getElementById('study-date').value;
+            const hours = parseFloat(document.getElementById('study-hours').value);
+            const topic = document.getElementById('study-topic').value;
+            const source = document.getElementById('study-source').value;
+            const notes = document.getElementById('study-notes').value;
+
+            const newEntry = {
+                id: Date.now(),
+                student,
+                date,
+                hours,
+                topic,
+                source,
+                notes
+            };
+
+            studyEntries.unshift(newEntry);
+            localStorage.setItem('aura_study_entries', JSON.stringify(studyEntries));
+
+            document.getElementById('study-form').reset();
+            document.getElementById('study-date').valueAsDate = new Date();
+            
+            const successBox = document.getElementById('entry-success');
+            successBox.classList.remove('hidden');
+            setTimeout(() => {
+                successBox.classList.add('hidden');
+            }, 4000);
+        }
+
+        function renderAdminData() {
+            const tbody = document.getElementById('entries-table-body');
+            const emptyState = document.getElementById('empty-state');
+            const countBadge = document.getElementById('total-entries-count');
+            const summaryCardsContainer = document.getElementById('student-summary-cards');
+
+            countBadge.innerText = `${studyEntries.length} Entries`;
+
+            summaryCardsContainer.innerHTML = '';
+            studentsList.forEach(name => {
+                const studentLogs = studyEntries.filter(e => e.student === name);
+                const totalHours = studentLogs.reduce((sum, e) => sum + e.hours, 0);
+                const count = studentLogs.length;
+
+                const card = document.createElement('div');
+                card.className = "luxury-glass p-4 rounded-2xl shadow-xs text-center flex flex-col justify-between";
+                card.innerHTML = `
+                    <div>
+                        <div class="w-7 h-7 rounded-full bg-stone-900 text-white font-bold text-[10px] flex items-center justify-center mx-auto mb-2">${name[0]}</div>
+                        <h4 class="text-xs font-bold text-stone-900 truncate">${name}</h4>
+                    </div>
+                    <div class="mt-3 pt-3 border-t border-stone-200/60">
+                        <p class="text-sm font-extrabold text-stone-900">${totalHours}h</p>
+                        <p class="text-[9px] text-stone-400 uppercase tracking-widest">${count} logs</p>
+                    </div>
+                `;
+                summaryCardsContainer.appendChild(card);
+            });
+
+            tbody.innerHTML = '';
+            if (studyEntries.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            studyEntries.forEach((entry) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-stone-50/50 transition-colors";
+                tr.innerHTML = `
+                    <td class="py-3 px-3 font-bold text-stone-900 flex items-center gap-2">
+                        <span class="w-5 h-5 rounded-full bg-stone-900 text-stone-100 text-[9px] font-bold flex items-center justify-center">${entry.student[0]}</span>
+                        ${entry.student}
+                    </td>
+                    <td class="py-3 px-3 text-stone-500 font-medium">${entry.date}</td>
+                    <td class="py-3 px-3 font-bold text-stone-900">${entry.hours} hrs</td>
+                    <td class="py-3 px-3 font-semibold text-stone-800">${entry.topic}</td>
+                    <td class="py-3 px-3 text-stone-600 italic text-[11px]">${entry.source}</td>
+                    <td class="py-3 px-3 text-stone-400 max-w-xs truncate">${entry.notes}</td>
+                    <td class="py-3 px-3 text-right">
+                        <button onclick="deleteEntry(${entry.id})" class="text-stone-300 hover:text-rose-600 transition-colors p-1" title="Delete Entry">
+                            <i class="fa-solid fa-trash-can text-xs"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function deleteEntry(id) {
+            studyEntries = studyEntries.filter(e => e.id !== id);
+            localStorage.setItem('aura_study_entries', JSON.stringify(studyEntries));
+            renderAdminData();
+        }
+
+        function clearAllData() {
+            if (confirm("Are you sure you want to clear all student records?")) {
+                studyEntries = [];
+                localStorage.removeItem('aura_study_entries');
+                renderAdminData();
+            }
+        }
+
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(studyEntries, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "study_track_records.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        // --- CHARTS & LEADERBOARD LOGIC ---
+        function updateCharts() {
+            renderChartsAndLeaderboard();
+        }
+
+        function renderChartsAndLeaderboard() {
+            const filterStudent = document.getElementById('chart-filter-student').value;
+            const activeEntries = filterStudent === 'all' 
+                ? studyEntries 
+                : studyEntries.filter(e => e.student === filterStudent);
+
+            // 1. Leaderboard Generation
+            const leaderboardContainer = document.getElementById('leaderboard-list');
+            leaderboardContainer.innerHTML = '';
+
+            const studentStats = studentsList.map(name => {
+                const logs = studyEntries.filter(e => e.student === name);
+                const totalHours = logs.reduce((sum, e) => sum + e.hours, 0);
+                const daysActive = new Set(logs.map(e => e.date)).size;
+                return { name, totalHours, daysActive, entriesCount: logs.length };
+            }).sort((a, b) => b.totalHours - a.totalHours);
+
+            studentStats.forEach((st, idx) => {
+                const rankBadge = idx === 0 ? 'bg-amber-100 text-amber-800' : idx === 1 ? 'bg-stone-200 text-stone-800' : idx === 2 ? 'bg-orange-100 text-orange-900' : 'bg-stone-100 text-stone-600';
+                const item = document.createElement('div');
+                item.className = `flex items-center justify-between p-3 rounded-2xl luxury-glass shadow-2xs`;
+                item.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="w-6 h-6 rounded-xl font-bold text-[10px] flex items-center justify-center ${rankBadge}">${idx + 1}</span>
+                        <div>
+                            <h5 class="text-xs font-bold text-stone-900">${st.name}</h5>
+                            <p class="text-[9px] text-stone-400 font-medium">${st.daysActive} active days</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs font-extrabold text-stone-900">${st.totalHours} hrs</span>
+                    </div>
+                `;
+                leaderboardContainer.appendChild(item);
+            });
+
+            // 2. Pie Chart: Hours distribution per student
+            const pieCtx = document.getElementById('hoursPieChart').getContext('2d');
+            if (pieChartInstance) pieChartInstance.destroy();
+
+            const pieLabels = studentsList;
+            const pieData = studentsList.map(name => studyEntries.filter(e => e.student === name).reduce((sum, e) => sum + e.hours, 0));
+
+            pieChartInstance = new Chart(pieCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: pieLabels,
+                    datasets: [{
+                        data: pieData,
+                        backgroundColor: [
+                            '#1c1917', '#44403c', '#78716c', '#a8a29e', '#d6d3d1', '#57534e', '#292524'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { boxWidth: 10, font: { family: 'Plus Jakarta Sans', size: 10 } }
+                        }
+                    }
+                }
+            });
+
+            // 3. Bar Graph: Total Hours Studied per Student
+            const barCtx = document.getElementById('hoursBarChart').getContext('2d');
+            if (barChartInstance) barChartInstance.destroy();
+
+            barChartInstance = new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: studentsList,
+                    datasets: [{
+                        label: 'Study Hours',
+                        data: pieData,
+                        backgroundColor: '#1c1917',
+                        borderRadius: 6,
+                        barThickness: 24
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.03)' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // 4. Aesthetic Cool Graph (Days Studied vs Not Studied & Hours Intensity)
+            const waveCtx = document.getElementById('aestheticWaveChart').getContext('2d');
+            if (waveChartInstance) waveChartInstance.destroy();
+
+            const last7Days = [];
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                last7Days.push(d.toISOString().split('T')[0]);
+            }
+
+            const hoursOnDays = last7Days.map(date => {
+                return activeEntries.filter(e => e.date === date).reduce((sum, e) => sum + e.hours, 0);
+            });
+
+            waveChartInstance = new Chart(waveCtx, {
+                type: 'line',
+                data: {
+                    labels: last7Days.map(d => d.slice(5)), // MM-DD
+                    datasets: [{
+                        label: 'Daily Hours Studied',
+                        data: hoursOnDays,
+                        borderColor: '#1c1917',
+                        backgroundColor: 'rgba(28, 25, 23, 0.08)',
+                        fill: true,
+                        tension: 0.35,
+                        borderWidth: 2.5,
+                        pointBackgroundColor: '#1c1917',
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.03)' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        // --- ZEN ORBIT MINI-GAME LOGIC ---
+        let zenCanvas, zenCtx;
+        let gameRunning = false;
+        let gameScore = 0;
+        let gameHighScore = localStorage.getItem('aura_zen_highscore') || 0;
+        let angle = 0;
+        let targetAngle = Math.PI * 0.75;
+        let orbitSpeed = 0.03;
+        let gameAnimFrame = null;
+
+        document.getElementById('game-highscore').innerText = gameHighScore;
+
+        function initGameCanvas() {
+            zenCanvas = document.getElementById('zenCanvas');
+            zenCtx = zenCanvas.getContext('2d');
+            resizeCanvas();
+            drawZenScene();
+        }
+
+        function resizeCanvas() {
+            if (!zenCanvas) return;
+            const rect = zenCanvas.parentElement.getBoundingClientRect();
+            zenCanvas.width = rect.width;
+            zenCanvas.height = rect.height;
+        }
+
+        function startGame(e) {
+            if (e) e.stopPropagation();
+            gameRunning = true;
+            gameScore = 0;
+            document.getElementById('game-score').innerText = gameScore;
+            document.getElementById('game-status').innerText = "Playing...";
+            document.getElementById('game-overlay-msg').classList.add('opacity-0', 'pointer-events-none');
+            orbitSpeed = 0.03;
+            angle = 0;
+            spawnNewTarget();
+            if (gameAnimFrame) cancelAnimationFrame(gameAnimFrame);
+            gameLoop();
+        }
+
+        function stopGameLoop() {
+            gameRunning = false;
+            if (gameAnimFrame) cancelAnimationFrame(gameAnimFrame);
+        }
+
+        function spawnNewTarget() {
+            // Spawn target at random angle between 1 and 5 radians
+            targetAngle = Math.random() * (Math.PI * 1.8 - 0.5) + 0.5;
+        }
+
+        function handleGameAction() {
+            if (!gameRunning) return;
+
+            // Check angle difference
+            let diff = Math.abs((angle % (Math.PI * 2)) - (targetAngle % (Math.PI * 2)));
+            if (diff > Math.PI) diff = Math.PI * 2 - diff;
+
+            if (diff < 0.3) {
+                // Success hit!
+                gameScore += 10;
+                document.getElementById('game-score').innerText = gameScore;
+                if (gameScore > gameHighScore) {
+                    gameHighScore = gameScore;
+                    localStorage.setItem('aura_zen_highscore', gameHighScore);
+                    document.getElementById('game-highscore').innerText = gameHighScore;
+                }
+                orbitSpeed += 0.005; // Speed up slightly
+                spawnNewTarget();
+            } else {
+                // Miss
+                gameOver();
+            }
+        }
+
+        function gameOver() {
+            gameRunning = false;
+            document.getElementById('game-status').innerText = "Game Over";
+            const overlay = document.getElementById('game-overlay-msg');
+            overlay.classList.remove('opacity-0', 'pointer-events-none');
+            overlay.querySelector('h3').innerText = "Zen Broken!";
+            overlay.querySelector('p').innerText = `Final Score: ${gameScore}. Tap below to try again.`;
+        }
+
+        function gameLoop() {
+            if (!gameRunning) return;
+
+            angle += orbitSpeed;
+            drawZenScene();
+
+            gameAnimFrame = requestAnimationFrame(gameLoop);
+        }
+
+        function drawZenScene() {
+            if (!zenCtx || !zenCanvas) return;
+            const w = zenCanvas.width;
+            const h = zenCanvas.height;
+            const cx = w / 2;
+            const cy = h / 2;
+            const radius = Math.min(cx, cy) * 0.65;
+
+            zenCtx.clearRect(0, 0, w, h);
+
+            // Draw background orbit track
+            zenCtx.beginPath();
+            zenCtx.arc(cx, cy, radius, 0, Math.PI * 2);
+            zenCtx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            zenCtx.lineWidth = 6;
+            zenCtx.stroke();
+
+            // Draw target sweet spot ring
+            const tx = cx + Math.cos(targetAngle) * radius;
+            const ty = cy + Math.sin(targetAngle) * radius;
+            zenCtx.beginPath();
+            zenCtx.arc(tx, ty, 18, 0, Math.PI * 2);
+            zenCtx.fillStyle = 'rgba(197, 160, 89, 0.3)';
+            zenCtx.fill();
+            zenCtx.strokeStyle = '#c5a059';
+            zenCtx.lineWidth = 3;
+            zenCtx.stroke();
+
+            // Draw moving orbiting particle
+            const px = cx + Math.cos(angle) * radius;
+            const py = cy + Math.sin(angle) * radius;
+            zenCtx.beginPath();
+            zenCtx.arc(px, py, 12, 0, Math.PI * 2);
+            zenCtx.fillStyle = '#ffffff';
+            zenCtx.shadowColor = '#ffffff';
+            zenCtx.shadowBlur = 15;
+            zenCtx.fill();
+            zenCtx.shadowBlur = 0; // Reset shadow
+
+            // Center anchor
+            zenCtx.beginPath();
+            zenCtx.arc(cx, cy, 6, 0, Math.PI * 2);
+            zenCtx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+            zenCtx.fill();
+        }
+
+        window.addEventListener('resize', () => {
+            if (document.getElementById('tab-games').classList.contains('hidden') === false) {
+                resizeCanvas();
+            }
+        });
+
+        // Keyboard support for game (Spacebar)
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && !document.getElementById('tab-games').classList.contains('hidden')) {
+                e.preventDefault();
+                handleGameAction();
+            }
+        });
+    </script>
+</body>
+</html>
